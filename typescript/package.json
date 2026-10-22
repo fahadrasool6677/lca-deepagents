@@ -12,6 +12,7 @@
     "@inquirer/prompts": "^8.5.2",
     "@langchain/anthropic": "latest",
     "@langchain/core": "^1.2.11",
+    "@langchain/google-genai": "^2.3.4",
     "@langchain/langgraph": "^1.4.10",
     "@langchain/mcp-adapters": "^1.1.4",
     "@langchain/ollama": "latest",
