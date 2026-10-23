@@ -1,3 +1,6 @@
+# system prompts → tool calling → agent loop → LangChain → LangGraph → DeepAgents
+
+
 #### Learn these topics in this order:
 1. System prompts — role, goal, instructions, constraints.
 2. Message hierarchy — system, developer, user, and tool messages.

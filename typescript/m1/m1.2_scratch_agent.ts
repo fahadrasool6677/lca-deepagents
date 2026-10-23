@@ -2,11 +2,20 @@ import { createDeepAgent } from "deepagents";
 
 import { model } from "../models.js";
 
-const agent = createDeepAgent({ model });
+const agent = createDeepAgent({
+    model,
+    systemPrompt: "You are a helpful assistant that answers questions about the course.",
+
+});
 console.log("Agent initialized ==================");
 
 const result = await agent.invoke({
-    messages: [{ role: "user", content: "How are you?" }]
+    messages: [
+        {
+            role: "user",
+            content: "How are you?"
+        }
+    ]
 });
 
 // console.log("Result==>", JSON.stringify(result));

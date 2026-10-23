@@ -57,7 +57,12 @@ const agent = createDeepAgent({
 });
 
 const result = await agent.invoke({
-  messages: [{ role: "user", content: "Give me the scoop on Tetris." }],
+  messages: [
+    {
+      role: "user",
+      content: "Give me the scoop on Tetris."
+    }
+  ],
 });
 
 console.log(result.messages.at(-1)?.text);

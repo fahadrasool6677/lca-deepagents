@@ -45,7 +45,7 @@ setGlobalDispatcher(new Agent({ connections: 64 }));
 
 // ═══ Google Gemini Models ══════════════════════════════════════════════════════
 // Requires @langchain/google-genai and GOOGLE_API_KEY in .env
-// export const model = await initChatModel("google-genai:gemini-3.5-flash", { timeout: 60_000, maxRetries: 2 });
+// export const model = await initChatModel("google-genai:gemini-3.8-live", { timeout: 60_000, maxRetries: 2 });
 
 // A more capable model for steps that need stronger reasoning
 export const strongModel = await initChatModel("google-genai:gemini-3.5-flash", { timeout: 120_000, maxRetries: 2 });
@@ -57,7 +57,6 @@ export const strongModel = await initChatModel("google-genai:gemini-3.5-flash", 
 // export const strongModel = await initChatModel("anthropic:claude-sonnet-5-5", { timeout: 120_000, maxRetries: 2 });
 
 // ═══ Alternative Models (comment out active models above, uncomment one below) ═
-// export const model = await initChatModel("google-genai:gemini-3.8-flash", { timeout: 60_000, maxRetries: 2 });
 // export const model = await initChatModel("anthropic:claude-sonnet-5-5");
 // export const model = await initChatModel("openai:gpt-6-luna");
 // export const strongModel = await initChatModel("openai:gpt-6.1-sol");
@@ -69,7 +68,12 @@ export const strongModel = await initChatModel("google-genai:gemini-3.5-flash", 
 // Pull a model first, e.g.:  ollama pull qwen2.5:7b
 // Note: small local models (7-8B) can mis-call tools or guess names; keep strongModel on a hosted model.
 //
-export const model = await initChatModel("ollama:qwen2.5:7b");
+export const model = await initChatModel(
+    "ollama:qwen3:14b",
+    {
+        timeout: 60_000,
+        maxRetries: 2
+    });
 
 // OpenRouter: hosted open-source models via OpenAI-compatible API
 // Free models available; sign up at openrouter.ai and get an API key

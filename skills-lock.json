@@ -1,0 +1,11 @@
+{
+  "version": 1,
+  "skills": {
+    "lca-deepagents": {
+      "source": "langchain-ai/lca-tutors",
+      "sourceType": "github",
+      "skillPath": "lca-deepagents/SKILL.md",
+      "computedHash": "88626f16c2ce05be1058da3fb6bbe86a20e3d58eab4e42cd0b3a738bc8bbdad5"
+    }
+  }
+}
