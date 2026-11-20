@@ -35,17 +35,19 @@ Responsibilities:
 
 const agent = createDeepAgent({
   model,
-  backend: new CompositeBackend(new StateBackend(), {
-    "/reference/": new FilesystemBackend({
-      rootDir: referenceDir,
-      virtualMode: true,
+  backend: new CompositeBackend(
+    new StateBackend(),
+    {
+      "/reference/": new FilesystemBackend({
+        rootDir: referenceDir,
+        virtualMode: true,
+      }),
     }),
-  }),
   permissions: [
     {
-      operations: ["write"],
+      operations: ["write", "read"],
       paths: ["/reference/**"],
-      mode: "deny",
+      mode: "allow",
     } satisfies FilesystemPermission,
   ],
 });
@@ -66,7 +68,9 @@ try {
         },
       ],
     },
-    { configurable: { thread_id: "lab-m2.2" } }
+    {
+      configurable: { thread_id: "lab-m2.2" }
+    }
   );
   console.log(result.messages.at(-1)?.text);
 } catch (e) {

@@ -1,4 +1,5 @@
 import { MultiServerMCPClient } from "@langchain/mcp-adapters";
+import { tool } from "langchain";
 import { createDeepAgent } from "deepagents";
 
 import { model } from "../models.js";
@@ -21,9 +22,23 @@ try {
     console.log(`  ${t.description?.slice(0, 90)}`);
   }
 
-  tools = tools.filter((t) => ALLOWED.has(t.name));
+  const ollamaTools = tools
+    .filter((t) => ALLOWED.has(t.name))
+    .map((mcpTool) =>
+      tool(
+        async (input) => {
+          const result = await mcpTool.invoke(input);
+          return typeof result === "string" ? result : JSON.stringify(result);
+        },
+        {
+          name: mcpTool.name,
+          description: mcpTool.description ?? "",
+          schema: mcpTool.schema,
+        }
+      )
+    );
 
-  const agent = createDeepAgent({ model, tools });
+  const agent = createDeepAgent({ model, tools: ollamaTools });
 
   const result = await agent.invoke({
     messages: [

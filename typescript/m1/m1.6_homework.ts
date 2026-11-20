@@ -61,10 +61,21 @@ type BuiltTools = {
   tools: Awaited<ReturnType<MultiServerMCPClient["getTools"]>>;
 };
 
+const ALLOWED = new Set(["ask_wiki_question"]);
+
 async function buildTools(): Promise<BuiltTools> {
-  // TODO 1: build a MultiServerMCPClient, fetch its tools, filter them,
-  // and return { client, tools }.
-  throw new Error("TODO 1: see the comment block above");
+  const client = new MultiServerMCPClient({
+    deepwiki: { transport: "http", url: "https://mcp.deepwiki.com/mcp" },
+  });
+
+  try {
+    const availableTools = await client.getTools();
+    const tools = availableTools.filter((tool) => ALLOWED.has(tool.name));
+    return { client, tools };
+  } catch (error) {
+    await client.close();
+    throw error;
+  }
 }
 
 // ════════════════════════════════════════════════════════════════════════
@@ -72,7 +83,8 @@ async function buildTools(): Promise<BuiltTools> {
 // not Lab 1's "what is MCP..." question.
 // ════════════════════════════════════════════════════════════════════════
 
-const QUESTION = "TODO 2: replace with a question that puts your chosen tool(s) to work.";
+const QUESTION =
+  "Using DeepWiki, explain the architecture of the public GitHub repository langchain-ai/deepagents, especially how create_deep_agent() and its middleware work.";
 
 const { client, tools } = await buildTools();
 
