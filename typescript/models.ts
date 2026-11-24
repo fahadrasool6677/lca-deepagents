@@ -68,8 +68,32 @@ export const strongModel = await initChatModel("google-genai:gemini-3.5-flash", 
 // Pull a model first, e.g.:  ollama pull qwen2.5:7b
 // Note: small local models (7-8B) can mis-call tools or guess names; keep strongModel on a hosted model.
 //
+// Fix @langchain/ollama limitation where non-string tool message content
+// (such as deepagents' [{ type: "text", text: ... }]) throws "Non string tool message content is not supported".
+import { ChatOllama } from "@langchain/ollama";
+const origOllamaStream = (ChatOllama.prototype as any)._streamResponseChunks;
+if (origOllamaStream && !(ChatOllama.prototype as any).__patchedForToolContent) {
+  (ChatOllama.prototype as any).__patchedForToolContent = true;
+  (ChatOllama.prototype as any)._streamResponseChunks = function (
+    messages: any[],
+    options: any,
+    runManager: any
+  ) {
+    const normalizedMessages = messages.map((m: any) => {
+      if (m._getType?.() === "tool" && Array.isArray(m.content)) {
+        const text = m.content
+          .map((c: any) => (typeof c === "string" ? c : (c.text ?? JSON.stringify(c))))
+          .join("\n");
+        return Object.assign(Object.create(Object.getPrototypeOf(m)), m, { content: text });
+      }
+      return m;
+    });
+    return origOllamaStream.call(this, normalizedMessages, options, runManager);
+  };
+}
+
 export const model = await initChatModel(
-    "ollama:qwen3:14b",
+    "ollama:qwen3-coder:30b",
     {
         timeout: 60_000,
         maxRetries: 2
