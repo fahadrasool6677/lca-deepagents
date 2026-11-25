@@ -1,11 +1,11 @@
 import { agent } from "../agent/agent.js";
 
-const config = { 
+const config: any = { 
   configurable: { thread_id: "view-input-demo" },
   callbacks: [{
-    handleChatModelStart(_llm, messages) {
+    handleChatModelStart(_llm: any, messages: any[][]) {
       console.log("\n================ MODEL RECEIVED THESE MESSAGES ================");
-      messages[0].forEach((m, idx) => {
+      messages[0].forEach((m: any, idx: number) => {
         const role = m.getType ? m.getType() : m.constructor.name;
         const text = typeof m.content === "string" ? m.content : JSON.stringify(m.content);
         console.log(`[Message ${idx}] (${role}):\n${text}\n`);
