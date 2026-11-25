@@ -2,9 +2,16 @@
 import { createInterface } from "node:readline/promises";
 import { stdin, stdout } from "node:process";
 import { randomUUID } from "node:crypto";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
+import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import type { BaseMessage } from "@langchain/core/messages";
 
 import { agent } from "../agent/agent.js";
+
+// Persistence path for thread index
+const __dirname = dirname(fileURLToPath(import.meta.url));
+const THREADS_FILE = join(__dirname, "../../data/threads.json");
 
 // 1. Define the structure of a conversation
 interface ChatThread {
@@ -18,6 +25,34 @@ const threads: ChatThread[] = [];
 
 let currentThreadId = "";
 
+function loadThreads(): ChatThread[] {
+    try {
+        if (existsSync(THREADS_FILE)) {
+            const raw = readFileSync(THREADS_FILE, "utf-8");
+            const parsed = JSON.parse(raw);
+            return parsed.map((t: any) => ({
+                ...t,
+                createdAt: new Date(t.createdAt),
+            }));
+        }
+    } catch {
+        // Fallback
+    }
+    return [];
+}
+
+function saveThreads(): void {
+    try {
+        const dataDir = join(__dirname, "../../data");
+        if (!existsSync(dataDir)) {
+            mkdirSync(dataDir, { recursive: true });
+        }
+        writeFileSync(THREADS_FILE, JSON.stringify(threads, null, 2), "utf-8");
+    } catch (e) {
+        console.error("Failed to save threads:", e);
+    }
+}
+
 // 3. Create a new conversation
 function createThread(): ChatThread {
     const thread: ChatThread = {
@@ -27,6 +62,7 @@ function createThread(): ChatThread {
     };
 
     threads.push(thread);
+    saveThreads();
 
     return thread;
 }
@@ -138,6 +174,7 @@ async function sendMessage(input: string): Promise<void> {
             input.length > 30
                 ? input.slice(0, 30) + "..."
                 : input;
+        saveThreads();
     }
 
     const response = await agent.invoke(
@@ -168,17 +205,26 @@ export async function startChat(): Promise<void> {
         output: stdout,
     });
 
-    // Automatically create the first conversation
-    const firstThread = createThread();
-
-    currentThreadId = firstThread.id;
-
     console.log("\n================================");
     console.log("       SIMPLE CHAT AGENT");
     console.log("================================");
 
-    console.log("\nA new conversation has been created.");
-    console.log(`Thread ID: ${currentThreadId}`);
+    // Load existing conversations from disk
+    const savedThreads = loadThreads();
+    threads.length = 0;
+    threads.push(...savedThreads);
+
+    if (threads.length > 0) {
+        const latestThread = threads[threads.length - 1];
+        currentThreadId = latestThread.id;
+        console.log(`\nResumed conversation: "${latestThread.title}"`);
+        console.log(`Thread ID: ${currentThreadId}`);
+    } else {
+        const firstThread = createThread();
+        currentThreadId = firstThread.id;
+        console.log("\nA new conversation has been created.");
+        console.log(`Thread ID: ${currentThreadId}`);
+    }
 
     console.log("\nAvailable commands:");
     console.log("/new       - Create a new conversation");
